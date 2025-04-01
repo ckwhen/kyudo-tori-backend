@@ -2,7 +2,7 @@ import scrapy
 import re
 import uuid
 from helpers.string_helper import convert_full_to_half
-from helpers.date_helper import convert_reiwa_to_ce_year, get_annual_full_date, pgsql_format
+from helpers.date_helper import convert_reiwa_to_ce_year, get_annual_full_date
 from ..items import ShinsaItem, DanItem
 
 class KyotoSpider(scrapy.Spider):
@@ -12,8 +12,7 @@ class KyotoSpider(scrapy.Spider):
 
     def parse(self, response):
         y = response.xpath('//*[@id="wsts"]/div/div[1]/div[1]/text()').get()
-        y = self.get_year(convert_full_to_half(y))
-        year = convert_reiwa_to_ce_year(int(y))
+        year = self.get_year(y)
 
         records = response.xpath('//*[@id="jc"]/div/div[1]/table/tbody/tr')
         del records[0]
@@ -67,10 +66,12 @@ class KyotoSpider(scrapy.Spider):
                 yield dan_item
 
     def get_year(self, input):
-        return re.search('(\d+).*?', input).group()
+        y = convert_full_to_half(input)
+        y = re.search('(\d+).*?', y).group()
+        return convert_reiwa_to_ce_year(int(y))
 
     def get_date(self, year, md):
         match = re.search('(\d+).+?(\d+)', md)
         m = match.group(1)
         d = match.group(2)
-        return get_annual_full_date(year, int(m), int(d)).strftime(pgsql_format)
+        return get_annual_full_date(year, int(m), int(d))

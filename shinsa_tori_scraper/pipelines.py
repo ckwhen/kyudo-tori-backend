@@ -1,3 +1,5 @@
+from sqlalchemy import cast, DateTime
+from sqlalchemy.exc import SQLAlchemyError
 from db.database import init_db, SessionLocal
 from models.shinsa import Shinsa
 from models.dan import Dan
@@ -10,26 +12,43 @@ class ShinsaToriScraperPipeline:
 
     def process_item(self, item, spider):
         if isinstance(item, ShinsaItem):
-            self.db.add(Shinsa(
-                id=item['id'],
-                name=item['name'],
-                location=item['location'],
-                reg_end_at=item['reg_end_at'],
-                start_at=item['start_at'],
-            ))
-            self.db.commit()
+            try:
+                self.db.add(Shinsa(
+                    id=item.get('id'),
+                    name=item.get('name'),
+                    location=item.get('location'),
+                    reg_start_at=item.get('reg_start_at'),
+                    reg_end_at=item.get('reg_end_at'),
+                    start_at=item.get('start_at'),
+                    end_at=item.get('end_at'),
+                ))
+                self.db.commit()
+            except SQLAlchemyError as e:
+                print(f"ShinsaItem: {e}")
+                self.db.rollback()
+            finally:
+                self.db.close()
 
         if isinstance(item, DanItem):
-            shinsa = (
-                self.db.query(Shinsa)
-                .filter_by(location=item['shinsa_location'], start_at=item['shinsa_start_at'])
-                .first()
-            )
-            dan = self.db.query(Dan).filter_by(name=item['name']).first()
+            try:
+                shinsa = (
+                    self.db.query(Shinsa)
+                    .filter(
+                        Shinsa.location == item.get('shinsa_location'),
+                        cast(Shinsa.start_at, DateTime).op('AT TIME ZONE')('UTC') == item.get('shinsa_start_at')
+                    )
+                    .first()
+                )
+                dan = self.db.query(Dan).filter(Dan.name == item.get('name')).first()
 
-            if shinsa and dan:
-                shinsa.dans.append(dan)
-                self.db.commit()
+                if shinsa and dan:
+                    shinsa.dans.append(dan)
+                    self.db.commit()
+            except SQLAlchemyError as e:
+                print(f"DanItem: {e}")
+                self.db.rollback()
+            finally:
+                self.db.close()
 
         return item
 

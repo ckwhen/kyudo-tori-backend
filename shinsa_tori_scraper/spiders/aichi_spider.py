@@ -1,22 +1,25 @@
 import scrapy
 import pdfplumber
 import re
-import datetime
+import uuid
 import pandas as pd
 from io import BytesIO
 from helpers.string_helper import convert_full_to_half
-from helpers.date_helper import convert_reiwa_to_ce_year
+from helpers.date_helper import convert_reiwa_to_ce_year, get_tokyo_pgsql_date
+from ..items import ShinsaItem, DanItem
+
+AICHI_HOST = 'http://www.aikyuren.com'
 
 class AichiSpider(scrapy.Spider):
     name = "aichi_spider"
     allowed_domains = ["www.aikyuren.com"]
-    start_urls = ["http://www.aikyuren.com/shinsanittei.html"]
+    start_urls = [f"{AICHI_HOST}/shinsanittei.html"]
 
     def parse(self, response):
         pdf_url = response.xpath('//*[@id="main"]/p[1]/a/@href').get()
 
         if pdf_url:
-            yield scrapy.Request(url='http://www.aikyuren.com/' + pdf_url, callback=self.parse_pdf)
+            yield scrapy.Request(url=f"{AICHI_HOST}/{pdf_url}", callback=self.parse_pdf)
 
     def parse_pdf(self, response):
         pdf_bytes = response.body
@@ -25,28 +28,49 @@ class AichiSpider(scrapy.Spider):
             records = self.flatten_extract(page.extract_table())
 
             for record in records:
+                shinsa_item = ShinsaItem()
+                dan_item = DanItem()
+                id = str(uuid.uuid4())
                 name = record['name']
+                loc = record['location']
+                dan_dict = {
+                    "sho": record['sho'],
+                    "ni": record['ni'],
+                    "san": record['san'],
+                    "yon": record['yon'],
+                    "go": record['go'],
+                }
 
                 if re.search('高校生講習会', name):
                     continue
 
                 year = convert_reiwa_to_ce_year(int(record['year']))
-                start_day = record['day']
                 month = int(record['month'])
-                end_day = None
+                s_day = record['day']
+                end_at = None
 
-                if re.search('\D+', start_day):
-                    match = re.search('(\d+).+?(\d+)', start_day)
-                    start_day = match.group(1)
+                if re.search('\D+', s_day):
+                    match = re.search('(\d+).+?(\d+)', s_day)
+                    s_day = match.group(1)
                     e = int(match.group(2))
-                    end_day = datetime.datetime(year, month, int(e))
+                    end_at = get_tokyo_pgsql_date(year, month, int(e))
 
-                yield {
-                    'name': name,
-                    'location': record['location'],
-                    'start_at': datetime.datetime(year, month, int(start_day)),
-                    'end_at': end_day,
-                }
+                start_at = get_tokyo_pgsql_date(year, month, int(s_day))
+
+                for k, v in dan_dict.items():
+                    if v == '':
+                        continue
+                    dan_item['shinsa_location'] = loc
+                    dan_item['shinsa_start_at'] = start_at
+                    dan_item['name'] = k
+                    yield dan_item
+
+                shinsa_item['id'] = id
+                shinsa_item['name'] = name
+                shinsa_item['location'] = loc
+                shinsa_item['start_at'] = start_at
+                shinsa_item['end_at'] = end_at
+                yield shinsa_item
 
     def flatten_extract(self, t):
         t.pop()
