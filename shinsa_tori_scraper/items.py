@@ -1,12 +1,16 @@
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
-
 import scrapy
 
+class ShinsaItem(scrapy.Item):
+    id = scrapy.Field()
+    name = scrapy.Field()
+    location = scrapy.Field()
+    reg_start_at = scrapy.Field()
+    reg_end_at = scrapy.Field()
+    start_at = scrapy.Field()
+    end_at = scrapy.Field()
 
-class ShinsaToriScraperItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class DanItem(scrapy.Item):
+    shinsa_location = scrapy.Field()
+    shinsa_start_at = scrapy.Field()
+    name = scrapy.Field()
+    
