@@ -25,7 +25,6 @@ class ShinsaToriScraperPipeline:
                 .filter_by(location=item['shinsa_location'], start_at=item['shinsa_start_at'])
                 .first()
             )
-            print(f'shinsa: {shinsa}')
             dan = self.db.query(Dan).filter_by(name=item['name']).first()
 
             if shinsa and dan:
