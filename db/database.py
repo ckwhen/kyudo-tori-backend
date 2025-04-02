@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from helpers.path_helper import PROJECT_ROOT
+from app.models.helper import Base
 
 dotenv_path = os.path.join(PROJECT_ROOT,'configs', '.env')
 load_dotenv(dotenv_path)
@@ -23,8 +23,6 @@ engine = create_engine(
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
 
 def init_db():
     Base.metadata.create_all(bind=engine)

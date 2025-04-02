@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Table, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from db.database import Base
+from .helper import Base
 
 shinsa_dan = Table(
     'shinsas_dans',
