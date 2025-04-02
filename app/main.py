@@ -19,6 +19,9 @@ app.add_middleware(LoggingMiddleware)
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to Kyudo Tori!"}
+    return {
+        "api_name": "Kyudo Tori API",
+        "version": "1.0.0",
+    }
 
 app.include_router(shinsas.router, prefix="/api/v1")
