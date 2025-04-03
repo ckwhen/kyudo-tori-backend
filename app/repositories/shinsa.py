@@ -1,13 +1,15 @@
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
+from typing import Dict, Any, Optional
 from ..models.helper import BaseModel
 from ..models.shinsa import ShinsaModel
-from ..models.dan import DanModel
+from ..models.helper import QueryBuilder
 
 class ShinsaRepository:
     def __init__(self, db: Session):
         self.db = db
-    
+        self.querier = QueryBuilder(ShinsaModel, self.db)
+
     def save(self, shinsa: ShinsaModel):
         try:
             self.db.add(ShinsaModel(
@@ -39,9 +41,29 @@ class ShinsaRepository:
             self.db.rollback()
             raise e
 
+    def get_filtered_all(
+            self,
+            filters: Dict[str, Any],
+            search: Optional[str],
+            offect: int, limit: int,
+            sort_by: str, order: str
+        ):
+        try:
+            return (
+                self.querier
+                .filter(filters)
+                .search(['name', 'location'], search)
+                .sort(sort_by, order)
+                .paginate(offect, limit)
+                .execute()
+            )
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            raise e
+
     def get_all(self):
         try:
-            return self.db.query(ShinsaModel).all()
+            return self.querier.execute()
         except SQLAlchemyError as e:
             self.db.rollback()
             raise e

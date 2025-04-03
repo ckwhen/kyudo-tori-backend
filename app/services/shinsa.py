@@ -14,12 +14,38 @@ class ShinsaService:
 
     def save_shinsa(self, shinsa: ShinsaModel):
         uniq = self.shinsa_repo.get_by_unique(shinsa.location, shinsa.start_at)
-        if uniq:
-            raise ValueError("Shinsa with this unique already exists")
+        if not uniq:
+            try:
+                self.shinsa_repo.save(shinsa)
+                return shinsa
+            except Exception as e:
+                raise e
 
+    # TODO fix sync problem
+    def save_shinsa_dans(self, dan_name, shinsa_location, shinsa_start_at):
+        uniq = self.shinsa_repo.get_by_unique(shinsa_location, shinsa_start_at)
+        dan = self.dan_repo.get_by_name(dan_name)
+        if uniq and dan:
+            try:
+                dan.shinsas.append(uniq)
+                return self.dan_repo.save()
+            except Exception as e:
+                raise e
+
+    def get_filtered_shinsas(
+        self,
+        filters,
+        search,
+        offect,limit,
+        sort_by,
+        order,
+    ):
         try:
-          self.shinsa_repo.save(shinsa)
-          return shinsa
+            return self.shinsa_repo.get_filtered_all(
+                filters,
+                search,
+                offect, limit,
+                sort_by, order
+            )
         except Exception as e:
-            print(f"save_shinsa: {e}")
             raise e

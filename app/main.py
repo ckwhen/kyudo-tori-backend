@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from app.api.v1.routers import shinsas
+from app.api.v1.api import api_v1_router
 from .middlewares import LoggingMiddleware
 
 origins = ["*"]
@@ -18,10 +18,10 @@ app.add_middleware(
 app.add_middleware(LoggingMiddleware)
 
 @app.get("/")
-def read_root():
+def root():
     return {
         "api_name": "Kyudo Tori API",
         "version": "1.0.0",
     }
 
-app.include_router(shinsas.router, prefix="/api/v1")
+app.include_router(api_v1_router)

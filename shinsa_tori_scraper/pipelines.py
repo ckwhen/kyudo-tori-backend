@@ -29,17 +29,11 @@ class ShinsaToriScraperPipeline:
             ))
 
         if isinstance(item, DanItem):
-                shinsa = (
-                    self.db.query(ShinsaModel)
-                    .filter(
-                        ShinsaModel.location == item.get('shinsa_location'),
-                        BaseModel.utc_cast(ShinsaModel.start_at) == item.get('shinsa_start_at')
-                    ).first()
-                )
-                dan = self.db.query(DanModel).filter(DanModel.name == item.get('name')).first()
-                if shinsa and dan:
-                    shinsa.dans.append(dan)
-                    self.db.commit()
+            self.shinsa_service.save_shinsa_dans(
+                item.get('name'),
+                item.get('shinsa_location'),
+                item.get('shinsa_start_at')
+            )
 
         return item
 

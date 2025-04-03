@@ -2,6 +2,7 @@
 name = "kyudo-tori-backend"
 version = "0.1.0"
 description = ""
+license = { file = "LICENSE" }
 authors = [
     {name = "Chih Kai Wen",email = "ckwen1988@gmail.com"}
 ]
