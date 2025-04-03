@@ -1,0 +1,14 @@
+Generic single-database configuration.
+
+```bash
+alembic revision --autogenerate -m "Initial migration"
+
+alembic upgrade head
+# or [Revision ID]
+alembic upgrade bf8dd5eded27
+```
+
+```bash
+# seed the database
+python3.13 -m app.seeds.seed
+```

@@ -1,1 +1,1 @@
-from ..models import shinsa, dan
+from ..models import shinsa, dan, shinsa_dan

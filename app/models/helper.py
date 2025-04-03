@@ -1,12 +1,14 @@
-from sqlalchemy import Column, DateTime
+from sqlalchemy import Column, DateTime, orm
 from sqlalchemy import cast
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, or_
 from typing import Dict, Any, Optional
 
-Base = declarative_base()
+@orm.as_declarative()
+class Base:
+    id: Any
  
 class BaseModel(Base):
     __abstract__ = True
