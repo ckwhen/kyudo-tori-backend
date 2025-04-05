@@ -21,17 +21,6 @@ class ShinsaService:
             except Exception as e:
                 raise e
 
-    # TODO fix sync problem
-    def save_shinsa_dans(self, dan_name, shinsa_location, shinsa_start_at):
-        uniq = self.shinsa_repo.get_by_unique(shinsa_location, shinsa_start_at)
-        dan = self.dan_repo.get_by_name(dan_name)
-        if uniq and dan:
-            try:
-                dan.shinsas.append(uniq)
-                return self.dan_repo.save()
-            except Exception as e:
-                raise e
-
     def get_filtered_shinsas(
         self,
         filters,

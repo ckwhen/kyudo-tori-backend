@@ -57,6 +57,13 @@ class AichiSpider(scrapy.Spider):
 
                 start_at = get_tokyo_pgsql_date(year, month, int(s_day))
 
+                shinsa_item['id'] = id
+                shinsa_item['name'] = name
+                shinsa_item['location'] = loc
+                shinsa_item['start_at'] = start_at
+                shinsa_item['end_at'] = end_at
+                yield shinsa_item
+
                 for k, v in dan_dict.items():
                     if v == '':
                         continue
@@ -64,13 +71,6 @@ class AichiSpider(scrapy.Spider):
                     dan_item['shinsa_start_at'] = start_at
                     dan_item['name'] = k
                     yield dan_item
-
-                shinsa_item['id'] = id
-                shinsa_item['name'] = name
-                shinsa_item['location'] = loc
-                shinsa_item['start_at'] = start_at
-                shinsa_item['end_at'] = end_at
-                yield shinsa_item
 
     def flatten_extract(self, t):
         t.pop()
