@@ -1,3 +1,4 @@
+import csv
 from db.database import init_db, SessionLocal
 from app.models.shinsa import ShinsaModel
 from app.models.dan import DanModel
@@ -5,6 +6,7 @@ from app.repositories.shinsa import ShinsaRepository
 from app.repositories.dan import DanRepository
 from app.services.shinsa import ShinsaService
 from .items import ShinsaItem, DanItem
+from .items import DojoItem
 
 class ShinsaToriScraperPipeline:
     def __init__(self):
@@ -45,3 +47,29 @@ class ShinsaToriScraperPipeline:
 
     def close_spider(self, spider):
         self.db.close()
+
+
+class KyudojoCsvPipeline:
+    def open_spider(self, spider):
+        self.file = open('kyudojo.csv', 'w', newline='', encoding='utf-8')
+        self.fieldnames = [
+            'name',
+            'address',
+            'phone',
+            'province',
+            'province_code',
+            'latitude',
+            'longitude'
+        ]
+        self.writer = csv.DictWriter(self.file, fieldnames=self.fieldnames)
+        self.writer.writeheader()
+
+    def process_item(self, item, spider):
+        if not isinstance(item, DojoItem):
+            return None
+
+        self.writer.writerow(item)
+        return item
+
+    def close_spider(self, spider):
+        self.file.close()
