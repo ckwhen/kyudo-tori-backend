@@ -5,6 +5,12 @@
 
 ---
 
+## 專案相關連結
+
+- [kyudo-tori-frontend](https://github.com/ckwhen/kyudo-tori-frontend)：查詢與瀏覽審查資訊的前端模組（開發中）
+
+---
+
 ## 專案介紹
 
 **Kyudo Tori** 是為弓道學習者打造的資訊整合平台，目標是解決日本各地審查公告分散、不易查詢的困擾。
